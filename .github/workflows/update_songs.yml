@@ -1,0 +1,32 @@
+name: Actualizar lista de canciones
+
+on:
+  repository_dispatch:
+    types: [update-songs]
+
+jobs:
+  update_songs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Actualizar data/songs.json
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.PAT_GITHUB }}
+          script: |
+            const fs = require('fs');
+            // Obtenemos la lista enviada en el payload
+            const songs = JSON.parse(context.payload.songs);
+            // La guardamos formateada
+            fs.mkdirSync('data', { recursive: true });
+            fs.writeFileSync('data/songs.json', JSON.stringify(songs, null, 2));
+
+      - name: Commit y push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "actions@github.com"
+          git add data/songs.json
+          git commit -m "🔄 Actualización automática lista de canciones"
+          git push
