@@ -1,0 +1,103 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lista de Canciones</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input, select, button { margin: 5px; }
+    .cancion { margin: 10px 0; border-bottom: 1px solid #ccc; padding: 5px; }
+  </style>
+</head>
+<body>
+
+  <h1>🎵 Lista de Canciones</h1>
+
+  <h3>Agregar nueva canción:</h3>
+  <input type="text" id="nombre" placeholder="Nombre" />
+  <input type="text" id="tono" placeholder="Tono (Ej: C, Dm)" />
+  <input type="number" id="bpm" placeholder="BPM" />
+  <input type="text" id="clasificacion" placeholder="Clasificación (Ej: rock, balada)" />
+  <input type="text" id="artista" placeholder="Artista" />
+  <button onclick="agregarCancion()">Agregar</button>
+
+  <h3>Filtrar canciones:</h3>
+  <input type="text" id="filtroTono" placeholder="Filtrar por tono" />
+  <input type="number" id="filtroBpm" placeholder="Filtrar por BPM exacto" />
+  <input type="text" id="filtroClasificacion" placeholder="Filtrar por clasificación" />
+  <input type="text" id="filtroArtista" placeholder="Filtrar por artista" />
+  <button onclick="filtrarCanciones()">Filtrar</button>
+  <button onclick="mostrarCanciones()">Mostrar todas</button>
+
+  <h3>🎶 Resultados:</h3>
+  <div id="listaCanciones"></div>
+
+  <script>
+    let canciones = [];
+
+    function agregarCancion() {
+      const nombre = document.getElementById("nombre").value.trim();
+      const tono = document.getElementById("tono").value.trim();
+      const bpm = parseInt(document.getElementById("bpm").value);
+      const clasificacion = document.getElementById("clasificacion").value.trim();
+      const artista = document.getElementById("artista").value.trim();
+
+      if (!nombre || !tono || isNaN(bpm) || !clasificacion || !artista) {
+        alert("Por favor completa todos los campos.");
+        return;
+      }
+
+      canciones.push({ nombre, tono, bpm, clasificacion, artista });
+      limpiarFormulario();
+      mostrarCanciones();
+    }
+
+    function limpiarFormulario() {
+      document.getElementById("nombre").value = "";
+      document.getElementById("tono").value = "";
+      document.getElementById("bpm").value = "";
+      document.getElementById("clasificacion").value = "";
+      document.getElementById("artista").value = "";
+    }
+
+    function mostrarCanciones(lista = canciones) {
+      const contenedor = document.getElementById("listaCanciones");
+      contenedor.innerHTML = "";
+
+      if (lista.length === 0) {
+        contenedor.innerHTML = "<p>No hay canciones que mostrar.</p>";
+        return;
+      }
+
+      lista.forEach(c => {
+        contenedor.innerHTML += `
+          <div class="cancion">
+            <strong>${c.nombre}</strong><br>
+            Tono: ${c.tono} | BPM: ${c.bpm} | Clasificación: ${c.clasificacion} | Artista: ${c.artista}
+          </div>
+        `;
+      });
+    }
+
+    function filtrarCanciones() {
+      const tono = document.getElementById("filtroTono").value.trim().toLowerCase();
+      const bpm = document.getElementById("filtroBpm").value;
+      const clasificacion = document.getElementById("filtroClasificacion").value.trim().toLowerCase();
+      const artista = document.getElementById("filtroArtista").value.trim().toLowerCase();
+
+      const filtradas = canciones.filter(c => {
+        return (
+          (tono === "" || c.tono.toLowerCase() === tono) &&
+          (bpm === "" || c.bpm == bpm) &&
+          (clasificacion === "" || c.clasificacion.toLowerCase() === clasificacion) &&
+          (artista === "" || c.artista.toLowerCase() === artista)
+        );
+      });
+
+      mostrarCanciones(filtradas);
+    }
+  </script>
+
+</body>
+</html>
