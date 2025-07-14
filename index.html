@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  
   <meta charset="UTF-8" />
   <title>Lista de Canciones</title>
   <style>
@@ -10,21 +9,16 @@
     .cancion { margin: 10px 0; border-bottom: 1px solid #ccc; padding: 5px; }
     .cancion button { margin-right: 5px; }
   </style>
-  
 </head>
 <body>
-  
   <h1>🎵 Lista de Canciones</h1>
 
   <h3>Agregar / Editar canción:</h3>
   <input type="text" id="nombre" placeholder="Nombre" />
   <select id="tono">
     <option value="">-- Tono / Relativa menor --</option>
-    <option>C / Am</option><option>C# / A#m</option><option>Db / Bbm</option>
-    <option>D / Bm</option><option>D# / Cm</option><option>Eb / Cm</option>
-    <option>E / C#m</option><option>F / Dm</option><option>F# / D#m</option>
-    <option>Gb / Ebm</option><option>G / Em</option><option>G# / Fm</option>
-    <option>Ab / Fm</option><option>A / F#m</option><option>A# / Gm</option>
+    <option>C / Am</option><option>D / Bm</option><option>E / C#m</option>
+    <option>F / Dm</option><option>G / Em</option><option>A / F#m</option>
     <option>B / G#m</option>
   </select>
   <input type="number" id="bpm" placeholder="BPM" />
@@ -37,11 +31,8 @@
   <h3>Filtrar canciones:</h3>
   <select id="filtroTono">
     <option value="">-- Tono / Relativa menor --</option>
-    <option>C / Am</option><option>C# / A#m</option><option>Db / Bbm</option>
-    <option>D / Bm</option><option>D# / Cm</option><option>Eb / Cm</option>
-    <option>E / C#m</option><option>F / Dm</option><option>F# / D#m</option>
-    <option>Gb / Ebm</option><option>G / Em</option><option>G# / Fm</option>
-    <option>Ab / Fm</option><option>A / F#m</option><option>A# / Gm</option>
+    <option>C / Am</option><option>D / Bm</option><option>E / C#m</option>
+    <option>F / Dm</option><option>G / Em</option><option>A / F#m</option>
     <option>B / G#m</option>
   </select>
   <input type="number" id="filtroBpm" placeholder="BPM exacto" />
@@ -55,23 +46,37 @@
   <div id="listaCanciones"></div>
 
   <script>
+    const BIN_ID = "687515405d646f1c273f7896"
+    const MASTER_KEY = "$2a$10$kDgczQ.rhzreHo9q4wTzUeSzc.9HPoAlDlCm4B2hmzy03EhLyJU4e" // ← reemplaza esto con tu clave real
+
     let canciones = []
     let editingIndex = null
 
-    // 1. Al cargar, leer desde songs.json
     document.addEventListener('DOMContentLoaded', () => {
-      fetch('songs.json')
-        .then(res => res.json())
-        .then(data => {
-          canciones = data.canciones || []
-          mostrarCanciones()
-        })
-        .catch(err => {
-          console.error('No se pudo cargar songs.json:', err)
-        })
+      fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+        headers: { 'X-Master-Key': MASTER_KEY }
+      })
+      .then(res => res.json())
+      .then(data => {
+        canciones = data.record.canciones || []
+        mostrarCanciones()
+      })
+      .catch(err => console.error('Error al cargar bin:', err))
     })
 
-    // 2. Mostrar canciones en pantalla
+    function guardarEnBin() {
+      fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': MASTER_KEY
+        },
+        body: JSON.stringify({ canciones })
+      })
+      .then(() => console.log('Bin actualizado'))
+      .catch(err => console.error('Error al guardar en bin:', err))
+    }
+
     function mostrarCanciones(lista = canciones) {
       const cont = document.getElementById('listaCanciones')
       cont.innerHTML = ''
@@ -93,7 +98,6 @@
       })
     }
 
-    // 3. Leer y validar formulario
     function leerFormulario() {
       const nombre = document.getElementById('nombre').value.trim()
       const tono = document.getElementById('tono').value
@@ -109,7 +113,6 @@
       return { nombre, tono, bpm, clasificacion: clas, artista: art, tematica: tema }
     }
 
-    // 4. Limpiar formulario
     function limpiarFormulario() {
       ['nombre','tono','bpm','clasificacion','artista','tematica']
         .forEach(id => document.getElementById(id).value = '')
@@ -118,16 +121,15 @@
       document.getElementById('btnGuardar').style.display = 'none'
     }
 
-    // 5. Agregar nueva canción (solo en memoria)
     document.getElementById('btnAgregar').onclick = () => {
       const datos = leerFormulario()
       if (!datos) return
       canciones.push(datos)
+      guardarEnBin()
       limpiarFormulario()
       mostrarCanciones()
     }
 
-    // 6. Iniciar edición
     function iniciarEdicion(idx) {
       const c = canciones[idx]
       ['nombre','tono','bpm','clasificacion','artista','tematica']
@@ -139,25 +141,24 @@
       document.getElementById('btnGuardar').style.display = 'inline-block'
     }
 
-    // 7. Guardar edición
     document.getElementById('btnGuardar').onclick = () => {
       const datos = leerFormulario()
       if (!datos) return
       canciones[editingIndex] = datos
+      guardarEnBin()
       limpiarFormulario()
       mostrarCanciones()
     }
 
-    // 8. Eliminar con confirmación
     function eliminarCancion(idx) {
       const nombre = canciones[idx].nombre
       if (confirm(`¿Deseas eliminar "${nombre}"?`)) {
         canciones.splice(idx, 1)
+        guardarEnBin()
         mostrarCanciones()
       }
     }
 
-    // 9. Filtrar resultados
     document.getElementById('btnFiltrar').onclick = () => {
       const t  = document.getElementById('filtroTono').value.toLowerCase()
       const b  = document.getElementById('filtroBpm').value
@@ -175,9 +176,7 @@
       mostrarCanciones(filtradas)
     }
 
-    // 10. Mostrar todo
     document.getElementById('btnMostrar').onclick = () => mostrarCanciones()
   </script>
-
 </body>
 </html>
