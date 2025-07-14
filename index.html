@@ -2,81 +2,194 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Lista de Canciones</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>🎵 Lista de Canciones</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: auto; }
-    input, select, button { margin: 5px; padding: 5px; font-size: 14px; }
-    button { cursor: pointer; }
-    select[multiple] { height: 100px; }
-    .cancion { margin: 10px 0; border-bottom: 1px solid #ccc; padding: 5px; }
-    .clasificacionEtiqueta { padding: 2px 6px; color: white; border-radius: 4px; font-weight: bold; }
+    /* Base */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: #f5f5f5; color: #333;
+    }
+    main {
+      max-width: 900px; margin: auto;
+      padding: 15px;
+    }
+    h1 { text-align: center; margin-bottom: 20px; }
+    h3 { margin: 15px 0 8px; }
+
+    /* Formularios */
+    .form-grid {
+      display: flex; flex-wrap: wrap;
+      gap: 10px; background: #fff;
+      padding: 15px; border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .form-grid > * {
+      flex: 1 1 120px; min-width: 120px;
+    }
+    input, select, button {
+      width: 100%; padding: 8px 10px;
+      border: 1px solid #ccc; border-radius: 4px;
+      font-size: 14px;
+    }
+    select[multiple] {
+      height: 100px;
+    }
+    button {
+      background: #007bff; color: #fff;
+      border: none; font-weight: bold;
+      transition: background .2s;
+    }
+    button:hover { background: #0056b3; }
+
+    /* Filtros plegables en móvil */
+    .filters {
+      margin: 15px 0;
+    }
+    .filters summary {
+      cursor: pointer; padding: 8px;
+      background: #007bff; color: white;
+      border-radius: 4px;
+    }
+    .filters details[open] summary {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+    .filters details > .form-grid {
+      border-top: none; margin-top: 0;
+    }
+
+    /* Lista de resultados */
+    #listaCanciones {
+      margin-top: 20px;
+    }
+    .cancion {
+      background: #fff; padding: 12px;
+      margin-bottom: 10px; border-radius: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .cancion strong { display: block; font-size: 18px; }
+    .cancion button {
+      margin-right: 5px; margin-top: 8px;
+      background: #28a745;
+    }
+    .cancion button:nth-child(2) {
+      background: #dc3545;
+    }
+    .cancion button:hover { opacity: 0.9; }
+
+    /* Etiqueta clasificación */
+    .clasificacionEtiqueta {
+      padding: 3px 8px; color: white;
+      border-radius: 4px; font-weight: bold;
+    }
+
+    /* Adaptaciones móviles */
+    @media (max-width: 600px) {
+      .form-grid { flex-direction: column; }
+      .cancion { font-size: 14px; }
+      .cancion strong { font-size: 16px; }
+    }
   </style>
 </head>
 <body>
-  <h1>🎵 Lista de Canciones</h1>
+  <main>
+    <h1>🎵 Lista de Canciones</h1>
 
-  <h3>Agregar / Editar canción:</h3>
-  <input type="text" id="nombre" placeholder="Nombre" />
-  <select id="tono">
-    <option value="">-- Tono / Relativa menor --</option>
-    <option>C / Am</option><option>C# / A#m</option><option>Db / Bbm</option>
-    <option>D / Bm</option><option>D# / Cm</option><option>Eb / Cm</option>
-    <option>E / C#m</option><option>F / Dm</option><option>F# / D#m</option>
-    <option>Gb / Ebm</option><option>G / Em</option><option>G# / Fm</option>
-    <option>Ab / Fm</option><option>A / F#m</option><option>A# / Gm</option>
-    <option>B / G#m</option>
-  </select>
-  <input type="number" id="bpm" placeholder="BPM" />
-  <input type="text" id="clasificacion" placeholder="Clasificación (Ej. Alabanza o Adoración)" />
-  <input type="text" id="artista" placeholder="Artista" />
-  <select id="tematica" multiple>
-    <option>Amor</option><option>Gracia</option><option>Misericordia</option>
-    <option>Exaltación</option><option>Iglesia</option><option>Comunidad</option>
-    <option>Guerra</option><option>Perdón</option><option>Humildad</option>
-    <option>Espíritu Santo</option><option>Jesús</option><option>Padre</option>
-    <option>Gloria</option><option>Sacrificio</option><option>Obediencia</option>
-    <option>Intimidad</option><option>Gozo</option><option>Corito</option>
-    <option>Alegría</option><option>Libertad</option><option>Milagros</option>
-    <option>Santidad</option><option>Promesas</option><option>Sanidad</option>
-    <option>Popurrí</option>
-  </select>
-  <button id="btnAgregar">Agregar</button>
-  <button id="btnGuardar" style="display:none;">Guardar Cambios</button>
+    <!-- Formulario de alta/edición -->
+    <h3>Agregar / Editar canción</h3>
+    <div class="form-grid">
+      <input type="text" id="nombre" placeholder="Nombre">
+      <select id="tono">
+        <option value="">-- Tono / Rel. menor --</option>
+        <option>C# / A#m</option><option>D# / Cm</option>
+        <option>F# / D#m</option><option>G# / Fm</option>
+        <option>A# / Gm</option>
+      </select>
+      <input type="number" id="bpm" placeholder="BPM">
+      <select id="clasificacion">
+        <option value="">-- Clasificación --</option>
+        <option>Alabanza</option><option>Adoración</option>
+      </select>
+      <input type="text" id="artista" placeholder="Artista">
+      <div>
+        <label for="tematica"><strong>Temática</strong></label><br>
+        <select id="tematica" multiple>
+          <option>Amor</option><option>Gracia</option><option>Misericordia</option>
+          <option>Exaltación</option><option>Iglesia</option><option>Comunidad</option>
+          <option>Guerra</option><option>Perdón</option><option>Humildad</option>
+          <option>Espíritu Santo</option><option>Jesús</option><option>Padre</option>
+          <option>Gloria</option><option>Sacrificio</option><option>Obediencia</option>
+          <option>Intimidad</option><option>Gozo</option><option>Corito</option>
+          <option>Alegría</option><option>Libertad</option><option>Milagros</option>
+          <option>Santidad</option><option>Promesas</option><option>Sanidad</option>
+          <option>Popurrí</option>
+        </select>
+      </div>
+      <button id="btnAgregar">Agregar</button>
+      <button id="btnGuardar" style="display:none;">Guardar</button>
+    </div>
 
-  <h3>Filtrar canciones:</h3>
-  <select id="filtroTono">
-    <option value="">-- Tono / Relativa menor --</option>
-    <option>C / Am</option><option>D / Bm</option><option>E / C#m</option>
-    <option>F / Dm</option><option>G / Em</option><option>A / F#m</option>
-    <option>B / G#m</option>
-  </select>
-  <input type="number" id="filtroBpm" placeholder="BPM exacto" />
-  <input type="text" id="filtroClasificacion" placeholder="Clasificación" />
-  <input type="text" id="filtroArtista" placeholder="Artista" />
-  <input type="text" id="filtroTematica" placeholder="Temática" />
-  <button id="btnFiltrar">Filtrar</button>
-  <button id="btnMostrar">Mostrar todas</button>
+    <!-- Filtros -->
+    <div class="filters">
+      <details>
+        <summary>🔎 Mostrar filtros</summary>
+        <div class="form-grid">
+          <select id="filtroTono">
+            <option value="">-- Tono --</option>
+            <option>C# / A#m</option><option>D# / Cm</option>
+            <option>F# / D#m</option><option>G# / Fm</option>
+            <option>A# / Gm</option>
+          </select>
+          <input type="number" id="filtroBpm" placeholder="BPM exacto">
+          <select id="filtroClasificacion">
+            <option value="">-- Clasificación --</option>
+            <option>Alabanza</option><option>Adoración</option>
+          </select>
+          <input type="text" id="filtroArtista" placeholder="Artista">
+          <div>
+            <label for="filtroTematica"><strong>Temática</strong></label><br>
+            <select id="filtroTematica" multiple>
+              <option>Amor</option><option>Gracia</option><option>Misericordia</option>
+              <option>Exaltación</option><option>Iglesia</option><option>Comunidad</option>
+              <option>Guerra</option><option>Perdón</option><option>Humildad</option>
+              <option>Espíritu Santo</option><option>Jesús</option><option>Padre</option>
+              <option>Gloria</option><option>Sacrificio</option><option>Obediencia</option>
+              <option>Intimidad</option><option>Gozo</option><option>Corito</option>
+              <option>Alegría</option><option>Libertad</option><option>Milagros</option>
+              <option>Santidad</option><option>Promesas</option><option>Sanidad</option>
+              <option>Popurrí</option>
+            </select>
+          </div>
+          <button id="btnFiltrar">Filtrar</button>
+          <button id="btnMostrar">Mostrar todas</button>
+        </div>
+      </details>
+    </div>
 
-  <h3>🎶 Resultados:</h3>
-  <div id="listaCanciones"></div>
+    <!-- Resultados -->
+    <h3>🎶 Resultados</h3>
+    <div id="listaCanciones"></div>
+  </main>
 
   <script>
-    const BIN_ID = "687515405d646f1c273f7896"
-    const MASTER_KEY = "$2a$10$kDgczQ.rhzreHo9q4wTzUeSzc.9HPoAlDlCm4B2hmzy03EhLyJU4e" // ← reemplázalo por tu clave real
+    const BIN_ID = "687515405d646f1c273f7896";
+    const MASTER_KEY = "$2a$10$kDgczQ.rhzreHo9q4wTzUeSzc.9HPoAlDlCm4B2hmzy03EhLyJU4e"; // reemplázalo con tu clave real
 
-    let canciones = []
-    let editingIndex = null
+    let canciones = [], editingIndex = null;
 
     document.addEventListener('DOMContentLoaded', () => {
       fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
         headers: { 'X-Master-Key': MASTER_KEY }
       })
-      .then(res => res.json())
-      .then(data => {
-        canciones = data.record.canciones || []
-        mostrarCanciones()
-      })
-    })
+      .then(r => r.json())
+      .then(d => {
+        canciones = d.record.canciones || [];
+        mostrarCanciones();
+      });
+    });
 
     function guardarEnBin() {
       fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
@@ -86,64 +199,108 @@
           'X-Master-Key': MASTER_KEY
         },
         body: JSON.stringify({ canciones })
-      })
+      });
     }
 
     function mostrarCanciones(lista = canciones) {
-      const cont = document.getElementById('listaCanciones')
-      cont.innerHTML = ''
+      const cont = document.getElementById('listaCanciones');
+      cont.innerHTML = '';
       if (!lista.length) {
-        cont.innerHTML = '<p>No hay canciones que mostrar.</p>'
-        return
+        cont.innerHTML = '<p>No hay canciones que mostrar.</p>';
+        return;
       }
-      lista.forEach((c, idx) => {
-        const color = c.clasificacion.toLowerCase() === "alabanza"
-          ? "#FFD700" : c.clasificacion.toLowerCase() === "adoración"
-          ? "#E53935" : "#ccc"
-        const clasLabel = `<span class="clasificacionEtiqueta" style="background-color:${color}">${c.clasificacion}</span>`
-        const temas = Array.isArray(c.tematica) ? c.tematica.join(", ") : c.tematica
+      lista.forEach((c, i) => {
+        const color = c.clasificacion === 'Alabanza'
+          ? '#FFD700'
+          : c.clasificacion === 'Adoración'
+          ? '#E53935' : '#888';
+        const clas = `<span class="clasificacionEtiqueta" style="background:${color}">${c.clasificacion}</span>`;
+        const temas = c.tematica.join(', ');
         cont.innerHTML += `
           <div class="cancion">
-            <strong>${c.nombre}</strong><br>
-            Tono: ${c.tono} | BPM: ${c.bpm} | Clasificación: ${clasLabel} |
-            Artista: ${c.artista} | Temática: ${temas}
-            <br>
-            <button onclick="iniciarEdicion(${idx})">Editar</button>
-            <button onclick="eliminarCancion(${idx})">Eliminar</button>
-          </div>
-        `
-      })
+            <strong>${c.nombre}</strong>
+            <div>Tono: ${c.tono} | BPM: ${c.bpm} | Clasificación: ${clas}</div>
+            <div>Artista: ${c.artista} | Temática: ${temas}</div>
+            <button onclick="iniciarEdicion(${i})">✏️</button>
+            <button onclick="eliminarCancion(${i})">🗑️</button>
+          </div>`;
+      });
     }
 
     function leerFormulario() {
-      const nombre = document.getElementById('nombre').value.trim()
-      const tono = document.getElementById('tono').value
-      const bpm = parseInt(document.getElementById('bpm').value)
-      const clas = document.getElementById('clasificacion').value.trim()
-      const art = document.getElementById('artista').value.trim()
-      const temaSelect = document.getElementById('tematica')
-      const tematicas = Array.from(temaSelect.selectedOptions).map(opt => opt.value)
+      const nombre = document.getElementById('nombre').value.trim();
+      const tono = document.getElementById('tono').value;
+      const bpm = parseInt(document.getElementById('bpm').value);
+      const clas = document.getElementById('clasificacion').value;
+      const art = document.getElementById('artista').value.trim();
+      const temSelect = document.getElementById('tematica');
+      const tematica = Array.from(temSelect.selectedOptions).map(o => o.value);
 
-      if (!nombre || !tono || isNaN(bpm) || !clas || !art || !tematicas.length) {
-        alert('Completa todos los campos.')
-        return null
+      if (!nombre || !tono || isNaN(bpm) || !clas || !art || !tematica.length) {
+        alert('Completa todos los campos.');
+        return null;
       }
-      return { nombre, tono, bpm, clasificacion: clas, artista: art, tematica: tematicas }
+      return { nombre, tono, bpm, clasificacion: clas, artista: art, tematica };
     }
 
     function limpiarFormulario() {
-      ['nombre','tono','bpm','clasificacion','artista'].forEach(id => document.getElementById(id).value = '')
-      document.getElementById('tematica').selectedIndex = -1
-      editingIndex = null
-      document.getElementById('btnAgregar').style.display = 'inline-block'
-      document.getElementById('btnGuardar').style.display = 'none'
+      ['nombre','tono','bpm','clasificacion','artista']
+        .forEach(id => document.getElementById(id).value = '');
+      document.getElementById('tematica').selectedIndex = -1;
+      editingIndex = null;
+      document.getElementById('btnAgregar').style.display = 'inline-block';
+      document.getElementById('btnGuardar').style.display = 'none';
     }
 
     document.getElementById('btnAgregar').onclick = () => {
-      const datos = leerFormulario()
-      if (!datos) return
-      canciones.push(datos)
-      guardarEnBin()
-      limpiarFormulario()
-      mostrarCanciones()
+      const d = leerFormulario(); if (!d) return;
+      canciones.push(d); guardarEnBin(); limpiarFormulario(); mostrarCanciones();
+    };
+
+    function iniciarEdicion(i) {
+      const c = canciones[i];
+      ['nombre','tono','bpm','clasificacion','artista']
+        .forEach(key => document.getElementById(key).value = c[key]);
+      const sel = document.getElementById('tematica');
+      Array.from(sel.options).forEach(o => o.selected = c.tematica.includes(o.value));
+      editingIndex = i;
+      document.getElementById('btnAgregar').style.display = 'none';
+      document.getElementById('btnGuardar').style.display = 'inline-block';
     }
+
+    document.getElementById('btnGuardar').onclick = () => {
+      const d = leerFormulario(); if (!d) return;
+      canciones[editingIndex] = d; guardarEnBin(); limpiarFormulario(); mostrarCanciones();
+    };
+
+    function eliminarCancion(i) {
+      if (confirm(`¿Eliminar "${canciones[i].nombre}"?`)) {
+        canciones.splice(i,1); guardarEnBin(); mostrarCanciones();
+      }
+    }
+
+    document.getElementById('btnFiltrar').onclick = () => {
+      const fTono = document.getElementById('filtroTono').value;
+      const fBpm  = document.getElementById('filtroBpm').value;
+      const fCla  = document.getElementById('filtroClasificacion').value;
+      const fArt  = document.getElementById('filtroArtista').value.trim().toLowerCase();
+      const fTem = Array.from(document.getElementById('filtroTematica')
+                    .selectedOptions).map(o => o.value);
+
+      const res = canciones.filter(c => {
+        const matchTem = fTem.length
+          ? fTem.some(t => c.tematica.includes(t))
+          : true;
+        return (!fTono || c.tono===fTono)
+            && (!fBpm  || c.bpm==fBpm)
+            && (!fCla  || c.clasificacion===fCla)
+            && (!fArt  || c.artista.toLowerCase().includes(fArt))
+            && matchTem;
+      });
+      mostrarCanciones(res);
+    };
+
+    document.getElementById('btnMostrar').onclick = () => mostrarCanciones();
+  </script>
+</body>
+</html>
