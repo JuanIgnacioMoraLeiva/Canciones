@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  
   <meta charset="UTF-8" />
   <title>Lista de Canciones</title>
   <style>
@@ -9,8 +10,10 @@
     .cancion { margin: 10px 0; border-bottom: 1px solid #ccc; padding: 5px; }
     .cancion button { margin-right: 5px; }
   </style>
+  
 </head>
 <body>
+  
   <h1>🎵 Lista de Canciones</h1>
 
   <h3>Agregar / Editar canción:</h3>
@@ -52,37 +55,29 @@
   <div id="listaCanciones"></div>
 
   <script>
-    let canciones = [];
-    let editingIndex = null;
+    let canciones = []
+    let editingIndex = null
 
-    // Cargar al iniciar
+    // 1. Al cargar, leer desde songs.json
     document.addEventListener('DOMContentLoaded', () => {
-      const stored = localStorage.getItem('canciones');
-      canciones = stored ? JSON.parse(stored) : [];
-      mostrarCanciones();
-    });
+      fetch('songs.json')
+        .then(res => res.json())
+        .then(data => {
+          canciones = data.canciones || []
+          mostrarCanciones()
+        })
+        .catch(err => {
+          console.error('No se pudo cargar songs.json:', err)
+        })
+    })
 
-    // Guardar cambios en localStorage
-    function guardarStorage() {
-      localStorage.setItem('canciones', JSON.stringify(canciones));
-    }
-
-    // Limpiar formulario
-    function limpiarFormulario() {
-      ['nombre','tono','bpm','clasificacion','artista','tematica']
-        .forEach(id => document.getElementById(id).value = '');
-      editingIndex = null;
-      document.getElementById('btnAgregar').style.display = 'inline-block';
-      document.getElementById('btnGuardar').style.display = 'none';
-    }
-
-    // Mostrar lista (todas o filtradas)
+    // 2. Mostrar canciones en pantalla
     function mostrarCanciones(lista = canciones) {
-      const cont = document.getElementById('listaCanciones');
-      cont.innerHTML = '';
+      const cont = document.getElementById('listaCanciones')
+      cont.innerHTML = ''
       if (!lista.length) {
-        cont.innerHTML = '<p>No hay canciones que mostrar.</p>';
-        return;
+        cont.innerHTML = '<p>No hay canciones que mostrar.</p>'
+        return
       }
       lista.forEach((c, idx) => {
         cont.innerHTML += `
@@ -94,75 +89,81 @@
             <button onclick="iniciarEdicion(${idx})">Editar</button>
             <button onclick="eliminarCancion(${idx})">Eliminar</button>
           </div>
-        `;
-      });
+        `
+      })
     }
 
-    // Agregar nueva canción
-    document.getElementById('btnAgregar').onclick = () => {
-      const datos = leerFormulario();
-      if (!datos) return;
-      canciones.push(datos);
-      guardarStorage();
-      limpiarFormulario();
-      mostrarCanciones();
-    };
-
-    // Iniciar edición
-    function iniciarEdicion(idx) {
-      const c = canciones[idx];
-      ['nombre','tono','bpm','clasificacion','artista','tematica']
-        .forEach(key => {
-          document.getElementById(key).value = c[key];
-        });
-      editingIndex = idx;
-      document.getElementById('btnAgregar').style.display = 'none';
-      document.getElementById('btnGuardar').style.display = 'inline-block';
-    }
-
-    // Guardar edición
-    document.getElementById('btnGuardar').onclick = () => {
-      const datos = leerFormulario();
-      if (!datos) return;
-      canciones[editingIndex] = datos;
-      guardarStorage();
-      limpiarFormulario();
-      mostrarCanciones();
-    };
-
-    // Leer y validar formulario
+    // 3. Leer y validar formulario
     function leerFormulario() {
-      const nombre = document.getElementById('nombre').value.trim();
-      const tono = document.getElementById('tono').value;
-      const bpm   = parseInt(document.getElementById('bpm').value);
-      const clas  = document.getElementById('clasificacion').value.trim();
-      const art   = document.getElementById('artista').value.trim();
-      const tema  = document.getElementById('tematica').value.trim();
+      const nombre = document.getElementById('nombre').value.trim()
+      const tono = document.getElementById('tono').value
+      const bpm   = parseInt(document.getElementById('bpm').value)
+      const clas  = document.getElementById('clasificacion').value.trim()
+      const art   = document.getElementById('artista').value.trim()
+      const tema  = document.getElementById('tematica').value.trim()
 
       if (!nombre || !tono || isNaN(bpm) || !clas || !art || !tema) {
-        alert('Completa todos los campos.');
-        return null;
+        alert('Completa todos los campos.')
+        return null
       }
-      return { nombre, tono, bpm, clasificacion: clas, artista: art, tematica: tema };
+      return { nombre, tono, bpm, clasificacion: clas, artista: art, tematica: tema }
     }
 
-    // Eliminar con confirmación
+    // 4. Limpiar formulario
+    function limpiarFormulario() {
+      ['nombre','tono','bpm','clasificacion','artista','tematica']
+        .forEach(id => document.getElementById(id).value = '')
+      editingIndex = null
+      document.getElementById('btnAgregar').style.display = 'inline-block'
+      document.getElementById('btnGuardar').style.display = 'none'
+    }
+
+    // 5. Agregar nueva canción (solo en memoria)
+    document.getElementById('btnAgregar').onclick = () => {
+      const datos = leerFormulario()
+      if (!datos) return
+      canciones.push(datos)
+      limpiarFormulario()
+      mostrarCanciones()
+    }
+
+    // 6. Iniciar edición
+    function iniciarEdicion(idx) {
+      const c = canciones[idx]
+      ['nombre','tono','bpm','clasificacion','artista','tematica']
+        .forEach(key => {
+          document.getElementById(key).value = c[key]
+        })
+      editingIndex = idx
+      document.getElementById('btnAgregar').style.display = 'none'
+      document.getElementById('btnGuardar').style.display = 'inline-block'
+    }
+
+    // 7. Guardar edición
+    document.getElementById('btnGuardar').onclick = () => {
+      const datos = leerFormulario()
+      if (!datos) return
+      canciones[editingIndex] = datos
+      limpiarFormulario()
+      mostrarCanciones()
+    }
+
+    // 8. Eliminar con confirmación
     function eliminarCancion(idx) {
-      const nombre = canciones[idx].nombre;
-      if (confirm(`¿Estás seguro que deseas eliminar "${nombre}"?`)) {
-        canciones.splice(idx, 1);
-        guardarStorage();
-        mostrarCanciones();
+      const nombre = canciones[idx].nombre
+      if (confirm(`¿Deseas eliminar "${nombre}"?`)) {
+        canciones.splice(idx, 1)
+        mostrarCanciones()
       }
     }
 
-    // Filtrar
+    // 9. Filtrar resultados
     document.getElementById('btnFiltrar').onclick = () => {
-      const t = document.getElementById('filtroTono').value.toLowerCase();
-      const b = document.getElementById('filtroBpm').value;
-      const cl= document.getElementById('filtroClasificacion').value.toLowerCase();
-      const ar= document.getElementById('filtroArtista').value.toLowerCase();
-      const te= document.getElementById('filtroTematica').value.toLowerCase();
+      const t  = document.getElementById('filtroTono').value.toLowerCase()
+      const b  = document.getElementById('filtroBpm').value
+      const cl = document.getElementById('filtroClasificacion').value.toLowerCase()
+      const ar = document.getElementById('filtroArtista').value.toLowerCase()
+      const te = document.getElementById('filtroTematica').value.toLowerCase()
 
       const filtradas = canciones.filter(c =>
         (!t  || c.tono.toLowerCase() === t) &&
@@ -170,12 +171,13 @@
         (!cl || c.clasificacion.toLowerCase() === cl) &&
         (!ar || c.artista.toLowerCase() === ar) &&
         (!te || c.tematica.toLowerCase() === te)
-      );
-      mostrarCanciones(filtradas);
-    };
+      )
+      mostrarCanciones(filtradas)
+    }
 
-    // Mostrar todo
-    document.getElementById('btnMostrar').onclick = () => mostrarCanciones();
+    // 10. Mostrar todo
+    document.getElementById('btnMostrar').onclick = () => mostrarCanciones()
   </script>
+
 </body>
 </html>
