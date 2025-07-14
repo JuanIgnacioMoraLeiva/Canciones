@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Lista de Canciones</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    input, select, button { margin: 5px; }
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: auto; }
+    input, select, button { margin: 5px; padding: 5px; font-size: 14px; }
+    button { cursor: pointer; }
+    select[multiple] { height: 100px; }
     .cancion { margin: 10px 0; border-bottom: 1px solid #ccc; padding: 5px; }
-    .cancion button { margin-right: 5px; }
+    .clasificacionEtiqueta { padding: 2px 6px; color: white; border-radius: 4px; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -17,14 +19,27 @@
   <input type="text" id="nombre" placeholder="Nombre" />
   <select id="tono">
     <option value="">-- Tono / Relativa menor --</option>
-    <option>C / Am</option><option>D / Bm</option><option>E / C#m</option>
-    <option>F / Dm</option><option>G / Em</option><option>A / F#m</option>
+    <option>C / Am</option><option>C# / A#m</option><option>Db / Bbm</option>
+    <option>D / Bm</option><option>D# / Cm</option><option>Eb / Cm</option>
+    <option>E / C#m</option><option>F / Dm</option><option>F# / D#m</option>
+    <option>Gb / Ebm</option><option>G / Em</option><option>G# / Fm</option>
+    <option>Ab / Fm</option><option>A / F#m</option><option>A# / Gm</option>
     <option>B / G#m</option>
   </select>
   <input type="number" id="bpm" placeholder="BPM" />
-  <input type="text" id="clasificacion" placeholder="Clasificación" />
+  <input type="text" id="clasificacion" placeholder="Clasificación (Ej. Alabanza o Adoración)" />
   <input type="text" id="artista" placeholder="Artista" />
-  <input type="text" id="tematica" placeholder="Temática" />
+  <select id="tematica" multiple>
+    <option>Amor</option><option>Gracia</option><option>Misericordia</option>
+    <option>Exaltación</option><option>Iglesia</option><option>Comunidad</option>
+    <option>Guerra</option><option>Perdón</option><option>Humildad</option>
+    <option>Espíritu Santo</option><option>Jesús</option><option>Padre</option>
+    <option>Gloria</option><option>Sacrificio</option><option>Obediencia</option>
+    <option>Intimidad</option><option>Gozo</option><option>Corito</option>
+    <option>Alegría</option><option>Libertad</option><option>Milagros</option>
+    <option>Santidad</option><option>Promesas</option><option>Sanidad</option>
+    <option>Popurrí</option>
+  </select>
   <button id="btnAgregar">Agregar</button>
   <button id="btnGuardar" style="display:none;">Guardar Cambios</button>
 
@@ -47,7 +62,7 @@
 
   <script>
     const BIN_ID = "687515405d646f1c273f7896"
-    const MASTER_KEY = "$2a$10$kDgczQ.rhzreHo9q4wTzUeSzc.9HPoAlDlCm4B2hmzy03EhLyJU4e" // ← reemplaza esto con tu clave real
+    const MASTER_KEY = "$2a$10$kDgczQ.rhzreHo9q4wTzUeSzc.9HPoAlDlCm4B2hmzy03EhLyJU4e" // ← reemplázalo por tu clave real
 
     let canciones = []
     let editingIndex = null
@@ -61,7 +76,6 @@
         canciones = data.record.canciones || []
         mostrarCanciones()
       })
-      .catch(err => console.error('Error al cargar bin:', err))
     })
 
     function guardarEnBin() {
@@ -73,8 +87,6 @@
         },
         body: JSON.stringify({ canciones })
       })
-      .then(() => console.log('Bin actualizado'))
-      .catch(err => console.error('Error al guardar en bin:', err))
     }
 
     function mostrarCanciones(lista = canciones) {
@@ -85,11 +97,16 @@
         return
       }
       lista.forEach((c, idx) => {
+        const color = c.clasificacion.toLowerCase() === "alabanza"
+          ? "#FFD700" : c.clasificacion.toLowerCase() === "adoración"
+          ? "#E53935" : "#ccc"
+        const clasLabel = `<span class="clasificacionEtiqueta" style="background-color:${color}">${c.clasificacion}</span>`
+        const temas = Array.isArray(c.tematica) ? c.tematica.join(", ") : c.tematica
         cont.innerHTML += `
           <div class="cancion">
             <strong>${c.nombre}</strong><br>
-            Tono: ${c.tono} | BPM: ${c.bpm} | Clasificación: ${c.clasificacion} |
-            Artista: ${c.artista} | Temática: ${c.tematica}
+            Tono: ${c.tono} | BPM: ${c.bpm} | Clasificación: ${clasLabel} |
+            Artista: ${c.artista} | Temática: ${temas}
             <br>
             <button onclick="iniciarEdicion(${idx})">Editar</button>
             <button onclick="eliminarCancion(${idx})">Eliminar</button>
@@ -101,21 +118,22 @@
     function leerFormulario() {
       const nombre = document.getElementById('nombre').value.trim()
       const tono = document.getElementById('tono').value
-      const bpm   = parseInt(document.getElementById('bpm').value)
-      const clas  = document.getElementById('clasificacion').value.trim()
-      const art   = document.getElementById('artista').value.trim()
-      const tema  = document.getElementById('tematica').value.trim()
+      const bpm = parseInt(document.getElementById('bpm').value)
+      const clas = document.getElementById('clasificacion').value.trim()
+      const art = document.getElementById('artista').value.trim()
+      const temaSelect = document.getElementById('tematica')
+      const tematicas = Array.from(temaSelect.selectedOptions).map(opt => opt.value)
 
-      if (!nombre || !tono || isNaN(bpm) || !clas || !art || !tema) {
+      if (!nombre || !tono || isNaN(bpm) || !clas || !art || !tematicas.length) {
         alert('Completa todos los campos.')
         return null
       }
-      return { nombre, tono, bpm, clasificacion: clas, artista: art, tematica: tema }
+      return { nombre, tono, bpm, clasificacion: clas, artista: art, tematica: tematicas }
     }
 
     function limpiarFormulario() {
-      ['nombre','tono','bpm','clasificacion','artista','tematica']
-        .forEach(id => document.getElementById(id).value = '')
+      ['nombre','tono','bpm','clasificacion','artista'].forEach(id => document.getElementById(id).value = '')
+      document.getElementById('tematica').selectedIndex = -1
       editingIndex = null
       document.getElementById('btnAgregar').style.display = 'inline-block'
       document.getElementById('btnGuardar').style.display = 'none'
@@ -129,54 +147,3 @@
       limpiarFormulario()
       mostrarCanciones()
     }
-
-    function iniciarEdicion(idx) {
-      const c = canciones[idx]
-      ['nombre','tono','bpm','clasificacion','artista','tematica']
-        .forEach(key => {
-          document.getElementById(key).value = c[key]
-        })
-      editingIndex = idx
-      document.getElementById('btnAgregar').style.display = 'none'
-      document.getElementById('btnGuardar').style.display = 'inline-block'
-    }
-
-    document.getElementById('btnGuardar').onclick = () => {
-      const datos = leerFormulario()
-      if (!datos) return
-      canciones[editingIndex] = datos
-      guardarEnBin()
-      limpiarFormulario()
-      mostrarCanciones()
-    }
-
-    function eliminarCancion(idx) {
-      const nombre = canciones[idx].nombre
-      if (confirm(`¿Deseas eliminar "${nombre}"?`)) {
-        canciones.splice(idx, 1)
-        guardarEnBin()
-        mostrarCanciones()
-      }
-    }
-
-    document.getElementById('btnFiltrar').onclick = () => {
-      const t  = document.getElementById('filtroTono').value.toLowerCase()
-      const b  = document.getElementById('filtroBpm').value
-      const cl = document.getElementById('filtroClasificacion').value.toLowerCase()
-      const ar = document.getElementById('filtroArtista').value.toLowerCase()
-      const te = document.getElementById('filtroTematica').value.toLowerCase()
-
-      const filtradas = canciones.filter(c =>
-        (!t  || c.tono.toLowerCase() === t) &&
-        (!b  || c.bpm == b) &&
-        (!cl || c.clasificacion.toLowerCase() === cl) &&
-        (!ar || c.artista.toLowerCase() === ar) &&
-        (!te || c.tematica.toLowerCase() === te)
-      )
-      mostrarCanciones(filtradas)
-    }
-
-    document.getElementById('btnMostrar').onclick = () => mostrarCanciones()
-  </script>
-</body>
-</html>
