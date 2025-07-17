@@ -157,23 +157,26 @@
       <div>
         <label for="tematica"><strong>Temática</strong></label>
         <select id="tematica" multiple>
-          <option>Amor</option><option>Gracia</option>
-          <option>Misericordia</option><option>Exaltación</option>
-          <option>Iglesia</option><option>Comunidad</option>
-          <option>Guerra</option><option>Perdón</option>
-          <option>Humildad</option><option>Espíritu Santo</option>
-          <option>Jesús</option><option>Padre</option>
-          <option>Gloria</option><option>Sacrificio</option>
-          <option>Obediencia</option><option>Intimidad</option>
-          <option>Gozo</option><option>Corito</option>
-          <option>Alegría</option><option>Libertad</option>
-          <option>Milagros</option><option>Santidad</option>
-          <option>Promesas</option><option>Sanidad</option>
-          <option>Popurrí</option><option>Poder</option>
-          <option>Salvación</option><option>Vida</option>
-          <option>Rey</option><option>Quebrantamiento</option>
+          <option>Amor</option><option>Gracia</option><option>Misericordia</option>
+          <option>Exaltación</option><option>Iglesia</option><option>Comunidad</option>
+          <option>Guerra</option><option>Perdón</option><option>Humildad</option>
+          <option>Espíritu Santo</option><option>Jesús</option><option>Padre</option>
+          <option>Gloria</option><option>Sacrificio</option><option>Obediencia</option>
+          <option>Intimidad</option><option>Gozo</option><option>Corito</option>
+          <option>Alegría</option><option>Libertad</option><option>Milagros</option>
+          <option>Santidad</option><option>Promesas</option><option>Sanidad</option>
+          <option>Popurrí</option><option>Poder</option><option>Salvación</option>
+          <option>Vida</option><option>Rey</option><option>Quebrantamiento</option>
           <option>Esperanza</option><option>Fuego</option>
         </select>
+      </div>
+      <div>
+        <label for="youtube"><strong>Enlace YouTube</strong></label>
+        <input type="url" id="youtube" placeholder="https://">
+      </div>
+      <div>
+        <label for="chords"><strong>Enlace Acordes</strong></label>
+        <input type="url" id="chords" placeholder="https://">
       </div>
       <div><button id="btnAgregar">Agregar</button></div>
       <div><button id="btnGuardar" style="display:none;">Guardar</button></div>
@@ -186,7 +189,7 @@
         <div class="form-grid">
           <div>
             <label for="buscarNombre"><strong>Buscar Nombre</strong></label>
-            <input type="text" id="buscarNombre" placeholder="Escribe parte del nombre">
+            <input type="text" id="buscarNombre" placeholder="Parte del nombre">
           </div>
           <div>
             <label for="filtroTono"><strong>Tono</strong></label>
@@ -218,21 +221,16 @@
           <div>
             <label for="filtroTematica"><strong>Temática</strong></label>
             <select id="filtroTematica" multiple>
-              <option>Amor</option><option>Gracia</option>
-              <option>Misericordia</option><option>Exaltación</option>
-              <option>Iglesia</option><option>Comunidad</option>
-              <option>Guerra</option><option>Perdón</option>
-              <option>Humildad</option><option>Espíritu Santo</option>
-              <option>Jesús</option><option>Padre</option>
-              <option>Gloria</option><option>Sacrificio</option>
-              <option>Obediencia</option><option>Intimidad</option>
-              <option>Gozo</option><option>Corito</option>
-              <option>Alegría</option><option>Libertad</option>
-              <option>Milagros</option><option>Santidad</option>
-              <option>Promesas</option><option>Sanidad</option>
-              <option>Popurrí</option><option>Poder</option>
-              <option>Salvación</option><option>Vida</option>
-              <option>Rey</option><option>Quebrantamiento</option>
+              <option>Amor</option><option>Gracia</option><option>Misericordia</option>
+              <option>Exaltación</option><option>Iglesia</option><option>Comunidad</option>
+              <option>Guerra</option><option>Perdón</option><option>Humildad</option>
+              <option>Espíritu Santo</option><option>Jesús</option><option>Padre</option>
+              <option>Gloria</option><option>Sacrificio</option><option>Obediencia</option>
+              <option>Intimidad</option><option>Gozo</option><option>Corito</option>
+              <option>Alegría</option><option>Libertad</option><option>Milagros</option>
+              <option>Santidad</option><option>Promesas</option><option>Sanidad</option>
+              <option>Popurrí</option><option>Poder</option><option>Salvación</option>
+              <option>Vida</option><option>Rey</option><option>Quebrantamiento</option>
               <option>Esperanza</option><option>Fuego</option>
             </select>
           </div>
@@ -247,7 +245,7 @@
     <div id="listaCanciones"></div>
   </main>
 
-  <!-- Modal -->
+  <!-- Modal de enlaces -->
   <div id="modal">
     <div class="content">
       <p>Enlaces para: <span id="modalTitle"></span></p>
@@ -259,44 +257,45 @@
 
   <script>
     const BIN_ID = "687515405d646f1c273f7896";
-    const MASTER_KEY = "$2a$10$kDgczQ.rhzreHo9q4wTzUeSzc.9HPoAlDlCm4B2hmzy03EhLyJU4e";
+    const MASTER_KEY = "$2a$10$kDgczQ.rhzreHo9q4wTzUeSzc.9HPoAlDlCm4B2hmzy03EhLyJU4e"; // cámbiala por tu clave real
 
     let canciones = [], editingIndex = null;
 
-    // 1. Cargar datos y listar artistas
+    // 1. Carga inicial
     document.addEventListener('DOMContentLoaded', () => {
       fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
         headers: { 'X-Master-Key': MASTER_KEY }
       })
-      .then(r => r.json()).then(d => {
+      .then(res => res.json()).then(d => {
         canciones = d.record.canciones || [];
         actualizarDatalistArtistas();
         mostrarCanciones();
       });
     });
 
-    // 2. Guardar cambios en el bin
+    // 2. Guarda en JSONBin
     function guardarEnBin() {
       fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type':'application/json',
           'X-Master-Key': MASTER_KEY
         },
         body: JSON.stringify({ canciones })
       });
     }
 
-    // 3. Mostrar lista
+    // 3. Muestra la lista
     function mostrarCanciones(lista = canciones) {
       actualizarDatalistArtistas();
       const cont = document.getElementById('listaCanciones');
       cont.innerHTML = '';
       if (!lista.length) {
-        cont.innerHTML = '<p>No hay canciones que mostrar.</p>'; return;
+        cont.innerHTML = '<p>No hay canciones que mostrar.</p>'; 
+        return;
       }
-      lista.forEach((c, i) => {
-        const colorCla = c.clasificacion === 'Alabanza' ? '#FFD700' : '#E53935';
+      lista.forEach((c,i) => {
+        const colorCla = c.clasificacion==='Alabanza'?'#FFD700':'#E53935';
         const clas = `<span class="clasificacionEtiqueta" style="background:${colorCla}">${c.clasificacion}</span>`;
         const tonoLabel = `<span class="tonoEtiqueta">${c.tono}</span>`;
         const temas = c.tematica.join(', ');
@@ -313,105 +312,101 @@
       });
     }
 
-    // 4. Leer formulario
+    // 4. Lee formulario (youtube y chords opcionales)
     function leerFormulario() {
       const n = document.getElementById('nombre').value.trim();
       const t = document.getElementById('tono').value;
       const b = parseInt(document.getElementById('bpm').value);
       const cl = document.getElementById('clasificacion').value;
       const ar = document.getElementById('artista').value.trim();
-      const tem = Array.from(
-        document.getElementById('tematica').selectedOptions
-      ).map(o => o.value);
+      const tem = Array.from(document.getElementById('tematica')
+        .selectedOptions).map(o=>o.value);
       const yt = document.getElementById('youtube').value.trim();
       const ch = document.getElementById('chords').value.trim();
 
-      if (!n || !t || isNaN(b) || !cl || !ar || !tem.length) {
-        alert('Completa todos los campos.'); return null;
+      if (!n||!t||isNaN(b)||!cl||!ar||!tem.length) {
+        alert('Completa los campos obligatorios.'); 
+        return null;
       }
-      return { nombre:n, tono:t, bpm:b, clasificacion:cl,
-               artista:ar, tematica:tem, youtube:yt, chords:ch };
+      return { nombre:n, tono:t, bpm:b,
+               clasificacion:cl, artista:ar,
+               tematica:tem, youtube: yt, chords: ch };
     }
 
-    // 5. Limpiar formulario
+    // 5. Limpia formulario
     function limpiarFormulario() {
       ['nombre','tono','bpm','clasificacion','artista','youtube','chords']
-        .forEach(id => document.getElementById(id).value = '');
-      document.getElementById('tematica').selectedIndex = -1;
-      editingIndex = null;
-      document.getElementById('btnAgregar').style.display = 'inline-block';
-      document.getElementById('btnGuardar').style.display = 'none';
+        .forEach(id=>document.getElementById(id).value='');
+      document.getElementById('tematica').selectedIndex=-1;
+      editingIndex=null;
+      document.getElementById('btnAgregar').style.display='inline-block';
+      document.getElementById('btnGuardar').style.display='none';
     }
 
-    // 6. Agregar canción
+    // 6. Agregar
     document.getElementById('btnAgregar').onclick = () => {
-      const datos = leerFormulario(); if (!datos) return;
-      canciones.push(datos);
+      const d = leerFormulario(); if (!d) return;
+      canciones.push(d);
       guardarEnBin(); limpiarFormulario(); mostrarCanciones();
     };
 
-    // 7. Confirmar edición
+    // 7. Confirmar y editar
     function confirmEdit(i) {
       if (!confirm('¿Estás seguro que quieres editar la canción?')) return;
       iniciarEdicion(i);
     }
-
-    // 8. Iniciar edición
     function iniciarEdicion(i) {
       const c = canciones[i];
       ['nombre','tono','bpm','clasificacion','artista','youtube','chords']
-        .forEach(k => document.getElementById(k).value = c[k] || '');
+        .forEach(k=>document.getElementById(k).value = c[k]||'');
       const sel = document.getElementById('tematica');
-      Array.from(sel.options).forEach(o => {
-        o.selected = c.tematica.includes(o.value);
-      });
-      editingIndex = i;
-      document.getElementById('btnAgregar').style.display = 'none';
-      document.getElementById('btnGuardar').style.display = 'inline-block';
+      Array.from(sel.options).forEach(o=>o.selected = c.tematica.includes(o.value));
+      editingIndex=i;
+      document.getElementById('btnAgregar').style.display='none';
+      document.getElementById('btnGuardar').style.display='inline-block';
     }
 
-    // 9. Guardar edición
+    // 8. Guardar edición
     document.getElementById('btnGuardar').onclick = () => {
-      const datos = leerFormulario(); if (!datos) return;
-      canciones[editingIndex] = datos;
+      const d = leerFormulario(); if (!d) return;
+      canciones[editingIndex]=d;
       guardarEnBin(); limpiarFormulario(); mostrarCanciones();
     };
 
-    // 10. Eliminar canción
+    // 9. Eliminar con confirmación
     function eliminarCancion(i) {
       if (!confirm(`¿Eliminar "${canciones[i].nombre}"?`)) return;
       canciones.splice(i,1);
       guardarEnBin(); mostrarCanciones();
     }
 
-    // 11. Filtrar
+    // 10. Filtrar incluyendo buscador de nombre
     document.getElementById('btnFiltrar').onclick = () => {
       const fN = document.getElementById('buscarNombre').value.trim().toLowerCase();
       const fT = document.getElementById('filtroTono').value;
       const fB = document.getElementById('filtroBpm').value;
       const fC = document.getElementById('filtroClasificacion').value;
       const fA = document.getElementById('filtroArtista').value.trim().toLowerCase();
-      const fTms = Array.from(
-        document.getElementById('filtroTematica').selectedOptions
-      ).map(o => o.value);
+      const fTms = Array.from(document.getElementById('filtroTematica')
+        .selectedOptions).map(o=>o.value);
 
       const res = canciones.filter(c => {
-        const matchName = !fN || c.nombre.toLowerCase().includes(fN);
-        const matchTem = !fTms.length || fTms.some(t => c.tematica.includes(t));
-        return matchName &&
-          (!fT || c.tono === fT) &&
-          (!fB  || c.bpm == fB) &&
-          (!fC  || c.clasificacion === fC) &&
-          (!fA  || c.artista.toLowerCase().includes(fA)) &&
-          matchTem;
+        const okName = !fN || c.nombre.toLowerCase().includes(fN);
+        const okTem = !fTms.length || fTms.some(t=>c.tematica.includes(t));
+        return okName &&
+          (!fT || c.tono===fT) &&
+          (!fB || c.bpm==fB) &&
+          (!fC || c.clasificacion===fC) &&
+          (!fA || c.artista.toLowerCase().includes(fA)) &&
+          okTem;
       });
       mostrarCanciones(res);
     };
 
-    // 12. Mostrar todo
+    // 11. Mostrar todo
     document.getElementById('btnMostrar').onclick = () => mostrarCanciones();
 
-    // 13. Modal de enlaces
+    // 12. Modal de enlaces
     function showLinks(i) {
       const c = canciones[i];
       document.getElementById('modalTitle').textContent = c.nombre;
@@ -423,9 +418,9 @@
       document.getElementById('modal').style.display = 'none';
     }
 
-    // 14. Actualizar lista de artistas para datalist
+    // 13. DataList de artistas
     function actualizarDatalistArtistas() {
-      const set = new Set(canciones.map(c => c.artista).filter(a => a));
+      const set = new Set(canciones.map(c=>c.artista).filter(a=>a));
       const dl = document.getElementById('listaArtistas');
       dl.innerHTML = '';
       set.forEach(art => {
@@ -435,3 +430,4 @@
     }
   </script>
 </body>
+</html>
