@@ -168,6 +168,7 @@
           <option>Popurrí</option><option>Poder</option><option>Salvación</option>
           <option>Vida</option><option>Rey</option><option>Quebrantamiento</option>
           <option>Esperanza</option><option>Fuego</option>
+          <option>Fidelidad</option><option>Clamor</option>
         </select>
       </div>
       <div>
@@ -216,7 +217,8 @@
           </div>
           <div>
             <label for="filtroArtista"><strong>Artista</strong></label>
-            <input type="text" id="filtroArtista" placeholder="Artista">
+            <input list="listaArtistasFilter" id="filtroArtista" placeholder="Artista">
+            <datalist id="listaArtistasFilter"></datalist>
           </div>
           <div>
             <label for="filtroTematica"><strong>Temática</strong></label>
@@ -231,7 +233,8 @@
               <option>Santidad</option><option>Promesas</option><option>Sanidad</option>
               <option>Popurrí</option><option>Poder</option><option>Salvación</option>
               <option>Vida</option><option>Rey</option><option>Quebrantamiento</option>
-              <option>Esperanzа</option><option>Fuego</option>
+              <option>Esperanza</option><option>Fuego</option>
+              <option>Fidelidad</option><option>Clamor</option>
             </select>
           </div>
           <div><button id="btnFiltrar">Filtrar</button></div>
@@ -261,17 +264,19 @@
 
     let canciones = [], editingIndex = null;
 
+    // Carga inicial
     document.addEventListener('DOMContentLoaded', () => {
       fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
         headers: { 'X-Master-Key': MASTER_KEY }
       })
       .then(r => r.json()).then(d => {
         canciones = d.record.canciones || [];
-        actualizarDatalistArtistas();
+        actualizarDatalistsArtistas();
         mostrarCanciones();
       });
     });
 
+    // Guarda en JSONBin
     function guardarEnBin() {
       fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
         method: 'PUT',
@@ -283,8 +288,9 @@
       });
     }
 
+    // Muestra lista en pantalla
     function mostrarCanciones(lista = canciones) {
-      actualizarDatalistArtistas();
+      actualizarDatalistsArtistas();
       const cont = document.getElementById('listaCanciones');
       cont.innerHTML = '';
       if (!lista.length) {
@@ -292,7 +298,9 @@
         return;
       }
       lista.forEach((c, i) => {
-        const colorCla = c.clasificacion === 'Alabanza' ? '#FFD700' : '#E53935';
+        const colorCla = c.clasificacion === 'Alabanza'
+          ? '#FFD700'
+          : '#FE4474';
         const clas = `<span class="clasificacionEtiqueta" style="background:${colorCla}">${c.clasificacion}</span>`;
         const tonoLabel = `<span class="tonoEtiqueta">${c.tono}</span>`;
         const temas = c.tematica.join(', ');
@@ -309,14 +317,16 @@
       });
     }
 
+    // Lee formulario
     function leerFormulario() {
-      const n = document.getElementById('nombre').value.trim();
-      const t = document.getElementById('tono').value;
-      const b = parseInt(document.getElementById('bpm').value);
+      const n  = document.getElementById('nombre').value.trim();
+      const t  = document.getElementById('tono').value;
+      const b  = parseInt(document.getElementById('bpm').value);
       const cl = document.getElementById('clasificacion').value;
       const ar = document.getElementById('artista').value.trim();
-      const tem = Array.from(document.getElementById('tematica')
-        .selectedOptions).map(o => o.value);
+      const tem = Array.from(
+        document.getElementById('tematica').selectedOptions
+      ).map(o => o.value);
       const yt = document.getElementById('youtube').value.trim();
       const ch = document.getElementById('chords').value.trim();
 
@@ -324,9 +334,12 @@
         alert('Completa los campos obligatorios.');
         return null;
       }
-      return { nombre: n, tono: t, bpm: b, clasificacion: cl, artista: ar, tematica: tem, youtube: yt, chords: ch };
+      return { nombre:n, tono:t, bpm:b,
+               clasificacion:cl, artista:ar,
+               tematica:tem, youtube:yt, chords:ch };
     }
 
+    // Limpia formulario
     function limpiarFormulario() {
       ['nombre','tono','bpm','clasificacion','artista','youtube','chords']
         .forEach(id => document.getElementById(id).value = '');
@@ -336,53 +349,65 @@
       document.getElementById('btnGuardar').style.display = 'none';
     }
 
+    // Agrega nueva canción
     document.getElementById('btnAgregar').onclick = () => {
-      const d = leerFormulario(); if (!d) return;
-      canciones.push(d);
+      const datos = leerFormulario(); if (!datos) return;
+      canciones.push(datos);
       guardarEnBin(); limpiarFormulario(); mostrarCanciones();
     };
 
+    // Confirmar y editar
     function confirmEdit(i) {
-      if (!confirm('¿Estás seguro que quieres editar la canción?')) return;
+      if (!confirm('¿Estás seguro que quieres editar la canción?'))
+        return;
       iniciarEdicion(i);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-
     function iniciarEdicion(i) {
       const c = canciones[i];
       ['nombre','tono','bpm','clasificacion','artista','youtube','chords']
         .forEach(k => document.getElementById(k).value = c[k] || '');
       const sel = document.getElementById('tematica');
-      Array.from(sel.options).forEach(o => o.selected = c.tematica.includes(o.value));
+      Array.from(sel.options).forEach(o =>
+        o.selected = c.tematica.includes(o.value)
+      );
       editingIndex = i;
       document.getElementById('btnAgregar').style.display = 'none';
       document.getElementById('btnGuardar').style.display = 'inline-block';
     }
 
+    // Guardar edición
     document.getElementById('btnGuardar').onclick = () => {
-      const d = leerFormulario(); if (!d) return;
-      canciones[editingIndex] = d;
+      const datos = leerFormulario(); if (!datos) return;
+      canciones[editingIndex] = datos;
       guardarEnBin(); limpiarFormulario(); mostrarCanciones();
     };
 
+    // Eliminar con confirmación
     function eliminarCancion(i) {
       if (!confirm(`¿Eliminar "${canciones[i].nombre}"?`)) return;
       canciones.splice(i, 1);
       guardarEnBin(); mostrarCanciones();
     }
 
+    // Filtrar incluyendo buscador de nombre
     document.getElementById('btnFiltrar').onclick = () => {
-      const fN = document.getElementById('buscarNombre').value.trim().toLowerCase();
-      const fT = document.getElementById('filtroTono').value;
-      const fB = document.getElementById('filtroBpm').value;
-      const fC = document.getElementById('filtroClasificacion').value;
-      const fA = document.getElementById('filtroArtista').value.trim().toLowerCase();
-      const fTms = Array.from(document.getElementById('filtroTematica')
-        .selectedOptions).map(o => o.value);
+      const fN  = document.getElementById('buscarNombre').value
+                    .trim().toLowerCase();
+      const fT  = document.getElementById('filtroTono').value;
+      const fB  = document.getElementById('filtroBpm').value;
+      const fC  = document.getElementById('filtroClasificacion').value;
+      const fA  = document.getElementById('filtroArtista').value
+                    .trim().toLowerCase();
+      const fTms= Array.from(
+                    document.getElementById('filtroTematica')
+                    .selectedOptions
+                  ).map(o => o.value);
 
       const res = canciones.filter(c => {
         const okName = !fN || c.nombre.toLowerCase().includes(fN);
-        const okTem = !fTms.length || fTms.some(t => c.tematica.includes(t));
+        const okTem  = !fTms.length ||
+                       fTms.some(t => c.tematica.includes(t));
         return okName &&
           (!fT || c.tono === fT) &&
           (!fB || c.bpm == fB) &&
@@ -393,26 +418,36 @@
       mostrarCanciones(res);
     };
 
-    document.getElementById('btnMostrar').onclick = () => mostrarCanciones();
+    // Mostrar todas
+    document.getElementById('btnMostrar').onclick =
+      () => mostrarCanciones();
 
+    // Modal de enlaces
     function showLinks(i) {
       const c = canciones[i];
       document.getElementById('modalTitle').textContent = c.nombre;
       document.getElementById('modalYoutube').href = c.youtube || '#';
-      document.getElementById('modalChords').href = c.chords || '#';
+      document.getElementById('modalChords').href  = c.chords  || '#';
       document.getElementById('modal').style.display = 'flex';
     }
     function closeModal() {
       document.getElementById('modal').style.display = 'none';
     }
 
-    function actualizarDatalistArtistas() {
-      const set = new Set(canciones.map(c => c.artista).filter(a => a));
-      const dl = document.getElementById('listaArtistas');
-      dl.innerHTML = '';
+    // Actualiza datalists de artistas
+    function actualizarDatalistsArtistas() {
+      const set = new Set(canciones
+        .map(c => c.artista).filter(a => a));
+      const formDL = document.getElementById('listaArtistas');
+      const filtDL = document.getElementById('listaArtistasFilter');
+      formDL.innerHTML = '';
+      filtDL.innerHTML = '';
       set.forEach(art => {
-        const opt = document.createElement('option');
-        opt.value = art; dl.appendChild(opt);
+        const o1 = document.createElement('option');
+        const o2 = document.createElement('option');
+        o1.value = art; o2.value = art;
+        formDL.appendChild(o1);
+        filtDL.appendChild(o2);
       });
     }
   </script>
