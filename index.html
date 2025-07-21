@@ -288,7 +288,7 @@
       });
     }
 
-    // Muestra lista en pantalla
+    // Muestra lista (usa índice original)
     function mostrarCanciones(lista = canciones) {
       actualizarDatalistsArtistas();
       const cont = document.getElementById('listaCanciones');
@@ -297,7 +297,9 @@
         cont.innerHTML = '<p>No hay canciones que mostrar.</p>';
         return;
       }
-      lista.forEach((c, i) => {
+      lista.forEach(c => {
+        // obtener índice real
+        const idx = canciones.indexOf(c);
         const colorCla = c.clasificacion === 'Alabanza'
           ? '#FFD700'
           : '#FE4474';
@@ -306,12 +308,12 @@
         const temas = c.tematica.join(', ');
         cont.innerHTML += `
           <div class="cancion">
-            <div class="cancion-title" onclick="showLinks(${i})">${c.nombre}</div>
+            <div class="cancion-title" onclick="showLinks(${idx})">${c.nombre}</div>
             <div>Tono: ${tonoLabel} | BPM: ${c.bpm} | Clasificación: ${clas}</div>
             <div>Artista: ${c.artista} | Temática: ${temas}</div>
             <div>
-              <button class="edit-btn" onclick="confirmEdit(${i})">✏️</button>
-              <button class="delete-btn" onclick="eliminarCancion(${i})">🗑️</button>
+              <button class="edit-btn" onclick="confirmEdit(${idx})">✏️</button>
+              <button class="delete-btn" onclick="eliminarCancion(${idx})">🗑️</button>
             </div>
           </div>`;
       });
@@ -349,17 +351,16 @@
       document.getElementById('btnGuardar').style.display = 'none';
     }
 
-    // Agrega nueva canción
+    // Agregar canción
     document.getElementById('btnAgregar').onclick = () => {
-      const datos = leerFormulario(); if (!datos) return;
-      canciones.push(datos);
+      const d = leerFormulario(); if (!d) return;
+      canciones.push(d);
       guardarEnBin(); limpiarFormulario(); mostrarCanciones();
     };
 
     // Confirmar y editar
     function confirmEdit(i) {
-      if (!confirm('¿Estás seguro que quieres editar la canción?'))
-        return;
+      if (!confirm('¿Estás seguro que quieres editar la canción?')) return;
       iniciarEdicion(i);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -378,36 +379,32 @@
 
     // Guardar edición
     document.getElementById('btnGuardar').onclick = () => {
-      const datos = leerFormulario(); if (!datos) return;
-      canciones[editingIndex] = datos;
+      const d = leerFormulario(); if (!d) return;
+      canciones[editingIndex] = d;
       guardarEnBin(); limpiarFormulario(); mostrarCanciones();
     };
 
-    // Eliminar con confirmación
+    // Eliminar canción
     function eliminarCancion(i) {
       if (!confirm(`¿Eliminar "${canciones[i].nombre}"?`)) return;
       canciones.splice(i, 1);
       guardarEnBin(); mostrarCanciones();
     }
 
-    // Filtrar incluyendo buscador de nombre
+    // Filtrar
     document.getElementById('btnFiltrar').onclick = () => {
-      const fN  = document.getElementById('buscarNombre').value
-                    .trim().toLowerCase();
+      const fN  = document.getElementById('buscarNombre').value.trim().toLowerCase();
       const fT  = document.getElementById('filtroTono').value;
       const fB  = document.getElementById('filtroBpm').value;
       const fC  = document.getElementById('filtroClasificacion').value;
-      const fA  = document.getElementById('filtroArtista').value
-                    .trim().toLowerCase();
+      const fA  = document.getElementById('filtroArtista').value.trim().toLowerCase();
       const fTms= Array.from(
-                    document.getElementById('filtroTematica')
-                    .selectedOptions
+                    document.getElementById('filtroTematica').selectedOptions
                   ).map(o => o.value);
 
       const res = canciones.filter(c => {
         const okName = !fN || c.nombre.toLowerCase().includes(fN);
-        const okTem  = !fTms.length ||
-                       fTms.some(t => c.tematica.includes(t));
+        const okTem  = !fTms.length || fTms.some(t => c.tematica.includes(t));
         return okName &&
           (!fT || c.tono === fT) &&
           (!fB || c.bpm == fB) &&
@@ -419,8 +416,8 @@
     };
 
     // Mostrar todas
-    document.getElementById('btnMostrar').onclick =
-      () => mostrarCanciones();
+    document.getElementById('btnMostrar').onclick = () =>
+      mostrarCanciones();
 
     // Modal de enlaces
     function showLinks(i) {
@@ -434,10 +431,9 @@
       document.getElementById('modal').style.display = 'none';
     }
 
-    // Actualiza datalists de artistas
+    // Actualiza datalists de artistas (form y filtro)
     function actualizarDatalistsArtistas() {
-      const set = new Set(canciones
-        .map(c => c.artista).filter(a => a));
+      const set = new Set(canciones.map(c => c.artista).filter(a => a));
       const formDL = document.getElementById('listaArtistas');
       const filtDL = document.getElementById('listaArtistasFilter');
       formDL.innerHTML = '';
