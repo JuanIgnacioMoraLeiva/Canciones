@@ -18,11 +18,25 @@
     h1 { text-align: center; margin-bottom: 20px; }
     h3 { margin: 15px 0 8px; }
 
-    /* Formularios */
-    .form-grid {
-      display: flex; flex-wrap: wrap; gap: 10px;
-      background: #fff; padding: 15px;
-      border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    /* Controls de vista y orden */
+    .view-controls {
+      display: flex; flex-wrap: wrap; align-items: center;
+      gap: 8px; margin-bottom: 12px;
+    }
+    .view-controls label { font-weight: bold; }
+    .view-btn, .order-btn {
+      padding: 4px 8px; border: 1px solid #007bff;
+      background: white; color: #007bff; border-radius: 4px;
+      cursor: pointer; font-size: 14px;
+    }
+    .view-btn.active, .order-btn.active {
+      background: #007bff; color: white;
+    }
+
+    /* Formularios de alta/edición y filtros (igual que antes) */
+    .form-grid { display: flex; flex-wrap: wrap; gap: 10px;
+      background: #fff; padding: 15px; border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
     .form-grid > div {
       flex: 1 1 120px; min-width: 120px;
@@ -35,61 +49,63 @@
       border: 1px solid #ccc; border-radius: 4px;
     }
     select[multiple] { height: 100px; }
-    button {
-      background: #007bff; color: #fff;
-      border: none; cursor: pointer;
-      transition: background .2s;
-    }
+    button { background: #007bff; color: #fff; border: none;
+      transition: background .2s; }
     button:hover { background: #0056b3; }
 
-    /* Filtros plegables */
     .filters { margin: 15px 0; }
     .filters details summary {
-      cursor: pointer; padding: 8px;
-      background: #007bff; color: white;
-      border-radius: 4px;
+      cursor: pointer; padding: 8px; background: #007bff;
+      color: white; border-radius: 4px;
     }
     .filters details[open] summary {
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0;
+      border-bottom-left-radius: 0; border-bottom-right-radius: 0;
     }
     .filters details > .form-grid {
       margin-top: 0; border-top: none;
     }
 
-    /* Lista de canciones */
+    /* Lista de canciones modo normal */
     #listaCanciones { margin-top: 20px; }
     .cancion {
-      background: #fff; padding: 12px;
-      margin-bottom: 10px; border-radius: 6px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      background: #fff; padding: 12px; margin-bottom: 10px;
+      border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     }
     .cancion-title {
-      font-size: 18px; font-weight: bold;
-      cursor: pointer; margin-bottom: 6px;
-      color: #007bff;
+      font-size: 18px; font-weight: bold; cursor: pointer;
+      margin-bottom: 6px; color: #007bff;
     }
-
-    /* Etiquetas */
     .clasificacionEtiqueta {
-      padding: 3px 8px; color: white;
-      border-radius: 4px; font-weight: bold;
+      padding: 3px 8px; color: white; border-radius: 4px;
+      font-weight: bold;
     }
     .tonoEtiqueta {
-      background: #d0f0c0; /* pastel green */
-      color: #333; padding: 3px 8px;
+      background: #d0f0c0; color: #333; padding: 3px 8px;
       border-radius: 4px; font-weight: bold;
     }
-
-    /* Botones editar/eliminar */
     .edit-btn, .delete-btn {
-      background: none; border: none;
-      padding: 2px 6px; font-size: 12px;
-      cursor: pointer; margin-right: 4px;
+      background: none; border: none; padding: 2px 6px;
+      font-size: 12px; cursor: pointer; margin-right: 4px;
     }
     .edit-btn { color: #007bff; }
     .delete-btn { color: #dc3545; }
     .edit-btn:hover, .delete-btn:hover { opacity: 0.7; }
+
+    /* Lista de canciones modo columnas */
+    #listaCanciones.columns-mode {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .cancion-column {
+      background: #fff; padding: 10px; text-align: center;
+      border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      font-size: 14px;
+    }
+    .cancion-column .tonoEtiqueta,
+    .cancion-column .clasificacionEtiqueta {
+      display: inline-block; margin: 4px 2px;
+    }
 
     /* Modal de enlaces */
     #modal {
@@ -98,8 +114,8 @@
       justify-content: center; align-items: center;
     }
     #modal .content {
-      background: white; padding: 20px;
-      border-radius: 6px; max-width: 90%; width: 300px;
+      background: white; padding: 20px; border-radius: 6px;
+      max-width: 90%; width: 300px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
     #modal .content a {
@@ -107,17 +123,25 @@
       text-decoration: none; font-weight: bold;
     }
 
-    /* Adaptación móvil */
     @media (max-width: 600px) {
       .form-grid { flex-direction: column; }
-      .cancion { font-size: 14px; }
-      .cancion-title { font-size: 16px; }
+      .cancion strong, .cancion-title { font-size: 16px; }
     }
   </style>
 </head>
 <body>
   <main>
     <h1>🎵 Lista de Canciones</h1>
+
+    <!-- Vista/Orden -->
+    <div class="view-controls">
+      <label>Modo visualización:</label>
+      <button id="viewNormal" class="view-btn active">Normal</button>
+      <button id="viewColumns" class="view-btn">Columnas</button>
+      <label>Orden:</label>
+      <button id="orderEntry" class="order-btn active">Por entrada</button>
+      <button id="orderAlpha" class="order-btn">Alfabético</button>
+    </div>
 
     <!-- Formulario de alta/edición -->
     <h3>Agregar / Editar canción</h3>
@@ -146,7 +170,8 @@
         <label for="clasificacion"><strong>Clasificación</strong></label>
         <select id="clasificacion">
           <option value="">-- Selecciona --</option>
-          <option>Alabanza</option><option>Adoración</option>
+          <option>Alabanza</option>
+          <option>Adoración</option>
         </select>
       </div>
       <div>
@@ -157,16 +182,21 @@
       <div>
         <label for="tematica"><strong>Temática</strong></label>
         <select id="tematica" multiple>
-          <option>Amor</option><option>Gracia</option><option>Misericordia</option>
-          <option>Exaltación</option><option>Iglesia</option><option>Comunidad</option>
-          <option>Guerra</option><option>Perdón</option><option>Humildad</option>
-          <option>Espíritu Santo</option><option>Jesús</option><option>Padre</option>
-          <option>Gloria</option><option>Sacrificio</option><option>Obediencia</option>
-          <option>Intimidad</option><option>Gozo</option><option>Corito</option>
-          <option>Alegría</option><option>Libertad</option><option>Milagros</option>
-          <option>Santidad</option><option>Promesas</option><option>Sanidad</option>
-          <option>Popurrí</option><option>Poder</option><option>Salvación</option>
-          <option>Vida</option><option>Rey</option><option>Quebrantamiento</option>
+          <option>Amor</option><option>Gracia</option>
+          <option>Misericordia</option><option>Exaltación</option>
+          <option>Iglesia</option><option>Comunidad</option>
+          <option>Guerra</option><option>Perdón</option>
+          <option>Humildad</option><option>Espíritu Santo</option>
+          <option>Jesús</option><option>Padre</option>
+          <option>Gloria</option><option>Sacrificio</option>
+          <option>Obediencia</option><option>Intimidad</option>
+          <option>Gozo</option><option>Corito</option>
+          <option>Alegría</option><option>Libertad</option>
+          <option>Milagros</option><option>Santidad</option>
+          <option>Promesas</option><option>Sanidad</option>
+          <option>Popurrí</option><option>Poder</option>
+          <option>Salvación</option><option>Vida</option>
+          <option>Rey</option><option>Quebrantamiento</option>
           <option>Esperanza</option><option>Fuego</option>
           <option>Fidelidad</option><option>Clamor</option>
         </select>
@@ -263,20 +293,20 @@
     const MASTER_KEY = "$2a$10$kDgczQ.rhzreHo9q4wTzUeSzc.9HPoAlDlCm4B2hmzy03EhLyJU4e";
 
     let canciones = [], editingIndex = null;
+    let viewMode = 'normal', sortMode = 'entry';
 
-    // Carga inicial
     document.addEventListener('DOMContentLoaded', () => {
       fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
         headers: { 'X-Master-Key': MASTER_KEY }
       })
-      .then(r => r.json()).then(d => {
+      .then(r => r.json())
+      .then(d => {
         canciones = d.record.canciones || [];
         actualizarDatalistsArtistas();
         mostrarCanciones();
       });
     });
 
-    // Guarda en JSONBin
     function guardarEnBin() {
       fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
         method: 'PUT',
@@ -288,51 +318,99 @@
       });
     }
 
-    // Muestra lista (usa índice original)
+    // Mostrar canciones con vista/orden
     function mostrarCanciones(lista = canciones) {
       actualizarDatalistsArtistas();
+      // aplicar orden
+      let displayList = [...lista];
+      if (sortMode === 'alpha') {
+        displayList.sort((a,b) => a.nombre.localeCompare(b.nombre));
+      }
       const cont = document.getElementById('listaCanciones');
       cont.innerHTML = '';
-      if (!lista.length) {
+      cont.className = viewMode === 'columns' ? 'columns-mode' : '';
+      if (!displayList.length) {
         cont.innerHTML = '<p>No hay canciones que mostrar.</p>';
         return;
       }
-      lista.forEach(c => {
-        // obtener índice real
-        const idx = canciones.indexOf(c);
-        const colorCla = c.clasificacion === 'Alabanza'
-          ? '#FFD700'
-          : '#FE4474';
-        const clas = `<span class="clasificacionEtiqueta" style="background:${colorCla}">${c.clasificacion}</span>`;
-        const tonoLabel = `<span class="tonoEtiqueta">${c.tono}</span>`;
-        const temas = c.tematica.join(', ');
-        cont.innerHTML += `
-          <div class="cancion">
-            <div class="cancion-title" onclick="showLinks(${idx})">${c.nombre}</div>
-            <div>Tono: ${tonoLabel} | BPM: ${c.bpm} | Clasificación: ${clas}</div>
-            <div>Artista: ${c.artista} | Temática: ${temas}</div>
-            <div>
-              <button class="edit-btn" onclick="confirmEdit(${idx})">✏️</button>
-              <button class="delete-btn" onclick="eliminarCancion(${idx})">🗑️</button>
-            </div>
-          </div>`;
-      });
+      if (viewMode === 'columns') {
+        displayList.forEach(c => {
+          const colorCla = c.clasificacion === 'Alabanza'
+            ? '#FFD700' : '#FE4474';
+          cont.innerHTML += `
+            <div class="cancion-column">
+              <strong>${c.nombre}</strong><br>
+              <span class="clasificacionEtiqueta" style="background:${colorCla}">
+                ${c.clasificacion}
+              </span><br>
+              <span class="tonoEtiqueta">${c.tono}</span>
+            </div>`;
+        });
+      } else {
+        displayList.forEach(c => {
+          const idx = canciones.indexOf(c);
+          const colorCla = c.clasificacion === 'Alabanza'
+            ? '#FFD700' : '#FE4474';
+          const clas = `<span class="clasificacionEtiqueta" style="background:${colorCla}">${c.clasificacion}</span>`;
+          const tonoLabel = `<span class="tonoEtiqueta">${c.tono}</span>`;
+          const temas = c.tematica.join(', ');
+          cont.innerHTML += `
+            <div class="cancion">
+              <div class="cancion-title" onclick="showLinks(${idx})">
+                ${c.nombre}
+              </div>
+              <div>Tono: ${tonoLabel} | BPM: ${c.bpm} | Clasificación: ${clas}</div>
+              <div>Artista: ${c.artista} | Temática: ${temas}</div>
+              <div>
+                <button class="edit-btn" onclick="confirmEdit(${idx})">✏️</button>
+                <button class="delete-btn" onclick="eliminarCancion(${idx})">🗑️</button>
+              </div>
+            </div>`;
+        });
+      }
     }
 
-    // Lee formulario
+    // Cambio de vista
+    document.getElementById('viewNormal').onclick = () => {
+      viewMode = 'normal';
+      document.getElementById('viewNormal').classList.add('active');
+      document.getElementById('viewColumns').classList.remove('active');
+      mostrarCanciones(filteredList());
+    };
+    document.getElementById('viewColumns').onclick = () => {
+      viewMode = 'columns';
+      document.getElementById('viewColumns').classList.add('active');
+      document.getElementById('viewNormal').classList.remove('active');
+      mostrarCanciones(filteredList());
+    };
+
+    // Cambio de orden
+    document.getElementById('orderEntry').onclick = () => {
+      sortMode = 'entry';
+      document.getElementById('orderEntry').classList.add('active');
+      document.getElementById('orderAlpha').classList.remove('active');
+      mostrarCanciones(filteredList());
+    };
+    document.getElementById('orderAlpha').onclick = () => {
+      sortMode = 'alpha';
+      document.getElementById('orderAlpha').classList.add('active');
+      document.getElementById('orderEntry').classList.remove('active');
+      mostrarCanciones(filteredList());
+    };
+
+    // Leer y validar formulario
     function leerFormulario() {
-      const n  = document.getElementById('nombre').value.trim();
-      const t  = document.getElementById('tono').value;
-      const b  = parseInt(document.getElementById('bpm').value);
-      const cl = document.getElementById('clasificacion').value;
-      const ar = document.getElementById('artista').value.trim();
+      const n = document.getElementById('nombre').value.trim();
+      const t = document.getElementById('tono').value;
+      const b = parseInt(document.getElementById('bpm').value);
+      const cl= document.getElementById('clasificacion').value;
+      const ar= document.getElementById('artista').value.trim();
       const tem = Array.from(
         document.getElementById('tematica').selectedOptions
       ).map(o => o.value);
-      const yt = document.getElementById('youtube').value.trim();
-      const ch = document.getElementById('chords').value.trim();
-
-      if (!n || !t || isNaN(b) || !cl || !ar || !tem.length) {
+      const yt= document.getElementById('youtube').value.trim();
+      const ch= document.getElementById('chords').value.trim();
+      if (!n||!t||isNaN(b)||!cl||!ar||!tem.length) {
         alert('Completa los campos obligatorios.');
         return null;
       }
@@ -341,7 +419,6 @@
                tematica:tem, youtube:yt, chords:ch };
     }
 
-    // Limpia formulario
     function limpiarFormulario() {
       ['nombre','tono','bpm','clasificacion','artista','youtube','chords']
         .forEach(id => document.getElementById(id).value = '');
@@ -351,14 +428,12 @@
       document.getElementById('btnGuardar').style.display = 'none';
     }
 
-    // Agregar canción
     document.getElementById('btnAgregar').onclick = () => {
       const d = leerFormulario(); if (!d) return;
       canciones.push(d);
-      guardarEnBin(); limpiarFormulario(); mostrarCanciones();
+      guardarEnBin(); limpiarFormulario(); mostrarCanciones(filteredList());
     };
 
-    // Confirmar y editar
     function confirmEdit(i) {
       if (!confirm('¿Estás seguro que quieres editar la canción?')) return;
       iniciarEdicion(i);
@@ -377,32 +452,30 @@
       document.getElementById('btnGuardar').style.display = 'inline-block';
     }
 
-    // Guardar edición
     document.getElementById('btnGuardar').onclick = () => {
       const d = leerFormulario(); if (!d) return;
       canciones[editingIndex] = d;
-      guardarEnBin(); limpiarFormulario(); mostrarCanciones();
+      guardarEnBin(); limpiarFormulario(); mostrarCanciones(filteredList());
     };
 
-    // Eliminar canción
     function eliminarCancion(i) {
       if (!confirm(`¿Eliminar "${canciones[i].nombre}"?`)) return;
       canciones.splice(i, 1);
-      guardarEnBin(); mostrarCanciones();
+      guardarEnBin(); mostrarCanciones(filteredList());
     }
 
-    // Filtrar
-    document.getElementById('btnFiltrar').onclick = () => {
-      const fN  = document.getElementById('buscarNombre').value.trim().toLowerCase();
-      const fT  = document.getElementById('filtroTono').value;
-      const fB  = document.getElementById('filtroBpm').value;
-      const fC  = document.getElementById('filtroClasificacion').value;
-      const fA  = document.getElementById('filtroArtista').value.trim().toLowerCase();
-      const fTms= Array.from(
-                    document.getElementById('filtroTematica').selectedOptions
-                  ).map(o => o.value);
+    // Filtrar y devolver lista filtrada
+    function filteredList() {
+      const fN = document.getElementById('buscarNombre').value.trim().toLowerCase();
+      const fT = document.getElementById('filtroTono').value;
+      const fB = document.getElementById('filtroBpm').value;
+      const fC = document.getElementById('filtroClasificacion').value;
+      const fA = document.getElementById('filtroArtista').value.trim().toLowerCase();
+      const fTms = Array.from(
+        document.getElementById('filtroTematica').selectedOptions
+      ).map(o => o.value);
 
-      const res = canciones.filter(c => {
+      return canciones.filter(c => {
         const okName = !fN || c.nombre.toLowerCase().includes(fN);
         const okTem  = !fTms.length || fTms.some(t => c.tematica.includes(t));
         return okName &&
@@ -412,14 +485,14 @@
           (!fA || c.artista.toLowerCase().includes(fA)) &&
           okTem;
       });
-      mostrarCanciones(res);
-    };
+    }
 
-    // Mostrar todas
+    document.getElementById('btnFiltrar').onclick = () =>
+      mostrarCanciones(filteredList());
+
     document.getElementById('btnMostrar').onclick = () =>
-      mostrarCanciones();
+      mostrarCanciones(filteredList());
 
-    // Modal de enlaces
     function showLinks(i) {
       const c = canciones[i];
       document.getElementById('modalTitle').textContent = c.nombre;
@@ -427,11 +500,11 @@
       document.getElementById('modalChords').href  = c.chords  || '#';
       document.getElementById('modal').style.display = 'flex';
     }
+
     function closeModal() {
       document.getElementById('modal').style.display = 'none';
     }
 
-    // Actualiza datalists de artistas (form y filtro)
     function actualizarDatalistsArtistas() {
       const set = new Set(canciones.map(c => c.artista).filter(a => a));
       const formDL = document.getElementById('listaArtistas');
@@ -441,7 +514,7 @@
       set.forEach(art => {
         const o1 = document.createElement('option');
         const o2 = document.createElement('option');
-        o1.value = art; o2.value = art;
+        o1.value = o2.value = art;
         formDL.appendChild(o1);
         filtDL.appendChild(o2);
       });
